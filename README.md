@@ -36,6 +36,8 @@ Enter the tool registration URL, which is `{NUXT_SERVER_URL}/registration`, and 
 
 ![Screenshot 2024-06-03 at 13.01.34.png](images/Screenshot_2024-06-03_at_13.01.34.png)
 
+You will be asked to enter a tool name (any string will do) and once you do to click "Continue" button.
+
 We’ve just performed dynamic registration. Alternatively, we could register the tool manually by filling in all the required fields and then adding the generated platform data to the tool's internal store. However, with dynamic registration, all of this is done automatically behind the scenes.
 
 ## Dynamic registration flow
@@ -47,9 +49,10 @@ Dynamic registration flow
 1. The Moodle Platform sends a `GET` request to the registration URL that we entered when registering the tool. This request contains the `openid_configuration` and `registration_token` query parameters:
    - `openid_configuration`: The endpoint for the OpenID configuration to be used for this registration.
    - `registration_token` (optional): The registration access token. If present, it must be used as the access token by the tool when making the registration request to the registration endpoint exposed in the OpenID configuration.
-2. When the `GET` request is received, the tool performs a `GET` request to the `openid_configuration` endpoint (in this example, [https://sandbox.moodledemo.net/mod/lti/openid-configuration.php](https://sandbox.moodledemo.net/mod/lti/openid-configuration.php)) to obtain the necessary platform OpenID configuration data.
-3. The platform responds with the configuration data.
-4. The tool sends a `POST` registration request with the following body:
+2. When the `GET` request is received, the tool verifies the query data and returns the `HTML` form containing input for the tool's name.
+3. When the `HTML` form gets submitted, the `POST` request is made to the tool's `/continue-registration` endpoint, then the tool performs a `GET` request to the `openid_configuration` endpoint (in this example, [https://sandbox.moodledemo.net/mod/lti/openid-configuration.php](https://sandbox.moodledemo.net/mod/lti/openid-configuration.php)) to obtain the necessary platform OpenID configuration data.
+4. The platform responds with the configuration data.
+5. The tool sends a `POST` registration request with the following body:
 
 ```tsx
 const registrationRequest = {
@@ -94,7 +97,7 @@ $fetch(configuration.registration_endpoint, {
 });
 ```
 
-5. The platform responds with a registration response that looks something like this:
+6. The platform responds with a registration response that looks something like this:
 
 ```tsx
 const registrationResponse = {
@@ -121,8 +124,8 @@ const registrationResponse = {
 };
 ```
 
-6. After receiving the registration response, the tool first generates a new platform key pair and then stores the platform data in its internal storage.
-7. Finally, the tool sends an HTML response to signal to the platform that the registration process is complete. Since the registration is performed inside an iframe, the tool responds with a script containing a `postMessage` call to send a message to the platform.
+7. After receiving the registration response, the tool first generates a new platform key pair and then stores the platform data in its internal storage.
+8. Finally, the tool sends an HTML response to signal to the platform that the registration process is complete. Since the registration is performed inside an iframe, the tool responds with a script containing a `postMessage` call to send a message to the platform.
 
 ```html
 <script>
