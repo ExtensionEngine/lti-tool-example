@@ -9,4 +9,5 @@ export type Platform = {
     key: string;
   };
   kid: string;
+  toolName: string;
 };
